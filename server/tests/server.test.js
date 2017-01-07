@@ -48,3 +48,31 @@ describe('POST /todo', () => {
       });
   });
 });
+
+describe('GET /todo', () => {
+
+  var text = 'Some to todo item';
+
+  it('should get all todo items', (done) => {
+
+    request(app)
+      .post('/todo')
+      .send({text})
+      .end();
+
+      request(app)
+        .get('/todo')
+        .expect(200)
+        .end((err, res) => {
+          if(err) {
+            return done(err);
+          }
+          console.log(res.body.todos);
+          Todo.find().then((todos) => {
+            expect(todos.length).toBe(res.body.todos.length);
+            expect(todos).toInclude(res.body.todos);
+            done();
+          }).catch((err) => done(err));
+        });
+  });
+});
