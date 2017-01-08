@@ -91,7 +91,7 @@ describe('GET /todo/:id', () => {
   });
 
   it('should not return todo doc.', (done) => {
-    var id = '68717803087ab52d1349a9ca'
+    var id = new ObjectID().toHexString();
     request(app)
       .get(`/todo/${id}`)
       .expect(404)
