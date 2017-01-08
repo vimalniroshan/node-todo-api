@@ -59,8 +59,6 @@ describe('POST /todo', () => {
 
 describe('GET /todo', () => {
 
-  var text = 'Some to todo item';
-
   it('should get all todo items', (done) => {
       request(app)
         .get('/todo')
@@ -76,4 +74,16 @@ describe('GET /todo', () => {
           }).catch((err) => done(err));
         });
   });
+
+  // it('should get todo item with provided id'. (done) => {
+  //
+  //
+  //   request(app)
+  //     .get('/todo/676576567')
+  //     .expect(200)
+  //     .expect((res) => {
+  //       var todo = res.todo;
+  //
+  //     })
+  // });
 });
