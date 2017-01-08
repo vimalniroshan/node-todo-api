@@ -1,12 +1,15 @@
 const expect = require('expect');
 const request = require('supertest');
+const {ObjectID} = require('mongodb');
 
 var {app} = require('./../server');
 var {Todo} = require('./../models/todo');
 
 const todos = [{
+    _id: new ObjectID(),
     text: 'First test todo'
 }, {
+    _id: new ObjectID(),
     text: 'Second test todo'
 }];
 
@@ -74,16 +77,32 @@ describe('GET /todo', () => {
           }).catch((err) => done(err));
         });
   });
+});
 
-  // it('should get todo item with provided id'. (done) => {
-  //
-  //
-  //   request(app)
-  //     .get('/todo/676576567')
-  //     .expect(200)
-  //     .expect((res) => {
-  //       var todo = res.todo;
-  //
-  //     })
-  // });
+describe('GET /todo/:id', () => {
+  it('should return todo doc.', (done) => {
+    request(app)
+      .get(`/todo/${todos[0]._id.toHexString()}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo._id).toBe(todos[0]._id.toHexString());
+        expect(res.body.todo.text).toBe(todos[0].text);
+      }).end(done);
+  });
+
+  it('should not return todo doc.', (done) => {
+    var id = '68717803087ab52d1349a9ca'
+    request(app)
+      .get(`/todo/${id}`)
+      .expect(404)
+      .end(done);
+  });
+
+  it('should return bad request', (done) => {
+    var id = '111'
+    request(app)
+      .get(`/todo/${id}`)
+      .expect(400)
+      .end(done);
+  });
 });
