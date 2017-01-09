@@ -55,14 +55,12 @@ app.delete('/todo/:id', (req, res) => {
     return res.status(400).send();
   }
 
-  Todo.findById(id)
+  Todo.findByIdAndRemove(id)
     .then((todo) => {
       if(!todo) {
         return res.status(404).send();
       }
-      todo.remove()
-        .then((todo) => res.send({todo}))
-        .catch((e) => res.status(400).send());
+      res.send({todo});
     }).catch((e) => res.status(400).send());
 });
 
