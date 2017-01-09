@@ -106,3 +106,32 @@ describe('GET /todo/:id', () => {
       .end(done);
   });
 });
+
+describe('DELTE /todo/:id', () => {
+  it('should delete todo doc', (done) => {
+    request(app)
+      .get(`/todo/${todos[1]._id.toHexString()}`)
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo._id).toBe(todos[1]._id.toHexString());
+        expect(res.body.todo.text).toBe(todos[1].text);
+      }).end(done);
+  });
+
+  it('should not delete a todo doc.', (done) => {
+    var id = new ObjectID().toHexString();
+    request(app)
+      .get(`/todo/${id}`)
+      .expect(404)
+      .end(done);
+  });
+
+  it('should return bad request', (done) => {
+    var id = '111'
+    request(app)
+      .get(`/todo/${id}`)
+      .expect(400)
+      .end(done);
+  });
+
+});
