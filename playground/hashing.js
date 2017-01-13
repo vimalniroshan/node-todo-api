@@ -1,4 +1,5 @@
 const {SHA256} = require('crypto-js');
+const bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 
 var msg = 'I am vimal';
@@ -31,3 +32,19 @@ var decoded = jwt.verify(token, 'abc123');
 
 console.log('Signature:', token);
 console.log('Verify:', decoded);
+
+//var pass = 'abc123!';
+var pass = 'abc12345'
+
+bcrypt.genSalt(10, (err, salt) => {
+  bcrypt.hash(pass, salt, (err, hashedPass) => {
+    console.log(hashedPass);
+  });
+});
+
+//var hashedPassword = '$2a$10$VJWz/TusXIySQGDYKXxuLebuWAyhHJW04/IRUr.nFGjO2GqtEG4ze';
+var hashedPassword = '$2a$10$nmDs07r1BWhYa4Qs53T7o.cHz46eFcqTUi4k5kcywJwwGlf9Tsvii';
+
+bcrypt.compare(pass, hashedPassword, (err, res) => {
+  console.log(res);
+});
