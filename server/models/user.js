@@ -4,6 +4,24 @@ const jwt = require('jsonwebtoken');
 const _ = require('lodash');
 const bcrypt = require('bcryptjs');
 
+const getHashedPassword = (password, promise) => {
+  return new Promise((resolve, reject) => {
+    bcrypt.genSalt(10, (err, salt) => {
+      if(err) {
+        reject(err);
+      }
+
+      bcrypt.hash(password, salt, (err, hashedPassword) => {
+        if(err) {
+          reject(err);
+        }
+
+        resolve(hashedPassword);
+      });
+    });
+  });
+};
+
 const UserSchema = new mongoose.Schema({
   email: {
     type: String,
@@ -71,20 +89,37 @@ UserSchema.statics.findByToken = function (token) {
   });
 };
 
+UserSchema.statics.findByEmailAndPassword = function (email, password) {
+  var User = this;
+
+  return User.findOne({email}).then((user) => {
+      if(!user) {
+        Promise.reject('Invalid credentials');
+      }
+
+      return new Promise((resolve, reject) => {
+        bcrypt.compare(password, user.password, (err, res) => {
+          if(res) {
+            return resolve(user);
+          }
+          return reject('Invalid credentials');
+        });
+      });
+  });
+};
+
 UserSchema.pre('save', function (next) {
   var user = this;
   if (user.isModified('password')) {
-    bcrypt.genSalt(10, (err, salt) => {
-      bcrypt.hash(user.password, salt, (err, hashedPassword) => {
-          user.password = hashedPassword;
-          next();
-      });
-    });
+    getHashedPassword(user.password)
+      .then((hashedPassword) => {
+        user.password = hashedPassword;
+        next();
+      }).catch((err) => next());
   } else {
     next();
   }
 });
-
 
 var User = mongoose.model('User', UserSchema);
 
