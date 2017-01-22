@@ -27,7 +27,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    minlength: 1,
+    minlength: 5,
     unique: true,
     validate: {
       validator: validator.isEmail,
@@ -57,7 +57,7 @@ UserSchema.methods.generateAuthToken = function () {
   var token = jwt.sign({
     _id: user._id.toHexString(),
     access
-  }, 'abc123asSecret').toString();
+  }, process.env.JWT_SECRET).toString();
 
   user.tokens.push({access, token});
   return user.save().then(() => {
@@ -87,7 +87,7 @@ UserSchema.statics.findByToken = function (token) {
   var decoded;
 
   try {
-    decoded = jwt.verify(token, 'abc123asSecret');
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
   } catch (e) {
     return Promise.reject();
   }
@@ -104,7 +104,7 @@ UserSchema.statics.findByEmailAndPassword = function (email, password) {
 
   return User.findOne({email}).then((user) => {
       if(!user) {
-        Promise.reject('Invalid credentials');
+        return Promise.reject('Invalid credentials');
       }
 
       return new Promise((resolve, reject) => {
