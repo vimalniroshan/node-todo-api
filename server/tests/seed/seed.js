@@ -8,27 +8,33 @@ const userOneId = new ObjectID();
 const userTwoId = new ObjectID();
 
 const users = [{
-  _id: userOneId,
-  email: 'vimal@example.com',
-  password: 'userOnePass',
-  tokens: [{
-    access: 'auth',
-    token: jwt.sign({_id: userOneId, access: 'auth'}, 'abc123asSecret')
-  }]
+    _id: userOneId,
+    email: 'vimal@example.com',
+    password: 'userOnePass',
+    tokens: [{
+      access: 'auth',
+      token: jwt.sign({_id: userOneId, access: 'auth'}, 'abc123asSecret')
+    }]
   }, {
     _id: userTwoId,
     email: 'nirosh@example.com',
-    password: 'userTwoPass'
+    password: 'userTwoPass',
+    tokens: [{
+      access: 'auth',
+      token: jwt.sign({_id: userTwoId, access: 'auth'}, 'abc123asSecret')
+    }]
   }];
 
 const todos = [{
     _id: new ObjectID(),
-    text: 'First test todo'
-}, {
+    text: 'First test todo',
+    _creator: userOneId
+  }, {
     _id: new ObjectID(),
     text: 'Second test todo',
     completed: true,
-    complatedAt: 123
+    complatedAt: 123,
+    _creator: userTwoId
 }];
 
 const populateTodos = (done) => {

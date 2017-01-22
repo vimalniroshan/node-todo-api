@@ -15,9 +15,10 @@ var port = process.env.PORT;
 
 app.use(bodyParser.json());
 
-app.post('/todo', (req, res) => {
+app.post('/todo', authenticate, (req, res) => {
   var todo = new Todo({
-    text: req.body.text
+    text: req.body.text,
+    _creator: req.user._id
   });
 
   todo.save()
@@ -28,22 +29,27 @@ app.post('/todo', (req, res) => {
     });
 });
 
-app.get('/todo', (req, res) => {
-    Todo.find().then((todos) => {
+app.get('/todo', authenticate, (req, res) => {
+    Todo.find({
+      _creator: req.user._id
+    }).then((todos) => {
       res.send({todos});
     }, (e) => {
       res.status(400).send(e);
     });
 });
 
-app.get('/todo/:id', (req, res) => {
+app.get('/todo/:id', authenticate, (req, res) => {
   var id = req.params.id;
 
   if(!ObjectID.isValid(id)) {
       return res.status(400).send();
   }
 
-  Todo.findById(id)
+  Todo.findOne({
+      _id: id,
+      _creator: req.user._id
+    })
     .then((todo) => {
       if(!todo) {
         return res.status(404).send();
@@ -52,14 +58,17 @@ app.get('/todo/:id', (req, res) => {
     }).catch((e) => res.status(400).send());
 });
 
-app.delete('/todo/:id', (req, res) => {
+app.delete('/todo/:id', authenticate, (req, res) => {
   var id = req.params.id;
 
   if(!ObjectID.isValid(id)) {
     return res.status(400).send();
   }
 
-  Todo.findByIdAndRemove(id)
+  Todo.findOneAndRemove({
+      _id: id,
+      _creator: req.user._id
+    })
     .then((todo) => {
       if(!todo) {
         return res.status(404).send();
@@ -68,7 +77,7 @@ app.delete('/todo/:id', (req, res) => {
     }).catch((e) => res.status(400).send());
 });
 
-app.patch('/todo/:id', (req, res) => {
+app.patch('/todo/:id', authenticate, (req, res) => {
   var id = req.params.id;
   var body = _.pick(req.body, ['text', 'completed']);
 
@@ -83,10 +92,13 @@ app.patch('/todo/:id', (req, res) => {
     body.completedAt = null;
   }
 
-  Todo.findByIdAndUpdate(id, {$set: body}, {new: true})
+  Todo.findOneAndUpdate({
+        _id: id,
+        _creator: req.user._id
+      }, {$set: body}, {new: true})
     .then((todo) => {
       if(!todo) {
-          return res.status(400).send();
+          return res.status(404).send();
       }
       res.send({todo});
     })
